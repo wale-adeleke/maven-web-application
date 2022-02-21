@@ -1,37 +1,38 @@
 node{
     
-    properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5')), [$class: 'JobLocalConfiguration', changeReasonComment: ''], 
-
-pipelineTriggers([pollSCM('* * * * *')])])
-
-
     
-    def mavenHome = tool name: "maven3.8.3"
+def mavenHome = tool name: "maven3.8.4"
 
+//Get the code from Github Repo
 stage('CheckoutCode'){
 
-git branch: 'development', credentialsId: '352cc3f6-7324-4a22-8c47-1424e7b2efd0', url: 'https://github.com/MithunTechnologiesDevOps/maven-web-application.git'
+git branch: 'development', credentialsId: '8d01dd37-04b8-4d1b-ad57-8d21cb8c6983', url: 'https://github.com/wale-adeleke/maven-web-application.git'
 }
 
-
+//Using Maven to build the package
 stage('Build'){
+    
 sh "${mavenHome}/bin/mvn clean package"
 }
 
- /*
+//Execute Code Quality
 stage('ExecuteSonarQubeReport'){
+    
 sh "${mavenHome}/bin/mvn sonar:sonar"
 }
-stage('UploadArtifcatIntoNexusRepo'){
+//Push Code into Nexus Artifactory
+stage('UploadArtifactIntoNexusRepo'){
+    
 sh "${mavenHome}/bin/mvn deploy"
 }
 
-stage('DeployAppintoTomcatServer')
-{
-sshagent(['c29671b1-f627-4b75-a391-49155466e661']) {
- sh  "scp -o StrictHostKeyChecking=no target/maven-web-application.war  ec2-user@65.0.27.170:/opt/apache-tomcat-9.0.56/webapps/"
+//DeployAppintoTomcatServer
+stage('UploadArtifactIntoNexusRepo'){
+    
+    sshagent(['08fc834a-367c-486a-ad8f-bb150e9e20f5']) {
+ sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@34.238.42.102:/opt/apache-tomcat-9.0.58/webapps/" 
+}
+    
 }
 
-}
-*/
-}
+}//Node closed
